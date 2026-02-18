@@ -45,7 +45,7 @@ function updateNodeClassName(
 }
 
 function ElementPropertis() {
-  const { selectedElemet, setData } = useEditor();
+  const { selectedElemet, setData, data } = useEditor();
 
   if (!selectedElemet) return <div>No selection</div>;
 
@@ -76,7 +76,7 @@ function ElementPropertis() {
     }));
     return;
   };
-
+  console.log(data);
   return (
     <Component
       data={selectedElemet.props?.className}
