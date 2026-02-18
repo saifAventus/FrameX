@@ -36,10 +36,8 @@ export function tailwindToStyleObject(
     if (!map || !rawValue) continue;
 
     if (map.key.startsWith("text")) {
-      console.log(rawValue, "string");
       styles[map.key] = rawValue;
     } else {
-      console.log(rawValue, "number");
       const value = Number(rawValue);
       if (!isNaN(value)) styles[map.key] = value;
     }
@@ -48,23 +46,22 @@ export function tailwindToStyleObject(
   return styles;
 }
 
-// export function styleObjectToTailwind(
-//   styles: Partial<Record<StyleKey, string | number>>,
-// ): string {
-//   return Object.entries(styles)
-//     .map(([key, value]) => {
-//       const map = TAILWIND_MAP.find((m) => m.key === key);
-//       if (!map) return "";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function attachIds(node: any): ElementNode {
+  if (!node.id) {
+    node.id = crypto.randomUUID();
+  }
 
-//       if (typeof value === "number") {
-//         return `${map.prefix}-${value}`;
-//       }
+  if (node.children) {
+    node.children = node.children.map(attachIds);
+  }
 
-//       return `${map.prefix}-${value}`;
-//     })
-//     .filter(Boolean)
-//     .join(" ");
-// }
+  if (node.layout) {
+    node.layout = node.layout.map(attachIds);
+  }
+
+  return node;
+}
 
 export function mergeTailwindClasses(
   existing: string,
@@ -83,13 +80,60 @@ export function mergeTailwindClasses(
 
     for (let i = result.length - 1; i >= 0; i--) {
       const base = result[i].split(":").pop()!;
-      if (base.startsWith(prefix)) {
+      if (base.startsWith(prefix) || base.startsWith(`${map.prefix}-[`)) {
         result.splice(i, 1);
       }
+    }
+
+    if (typeof value === "string" && value.startsWith("#")) {
+      result.push(`${map.prefix}-[${value}]`);
+      continue;
+    }
+
+    if (typeof value === "string" && value.endsWith("px")) {
+      result.push(`${map.prefix}-[${value}]`);
+      continue;
     }
 
     result.push(`${map.prefix}-${value}`);
   }
 
   return result.join(" ");
+}
+
+export function createNode(element: string): ElementNode {
+  return {
+    id: crypto.randomUUID(),
+    element,
+    props: {
+      className: "p-4 border border-dashed border-gray-400",
+    },
+    children: [],
+  };
+}
+
+export function insertNodeInside(
+  tree: ElementNode,
+  parentId: string,
+  newNode: ElementNode,
+): ElementNode {
+  if (tree.id === parentId && tree.id === "root") {
+    return {
+      ...tree,
+      layout: [...(tree.layout || []), newNode],
+    };
+  }
+
+  if (tree.id === parentId) {
+    return {
+      ...tree,
+      children: [...(tree.children || []), newNode],
+    };
+  }
+
+  return {
+    ...tree,
+    layout: tree.layout?.map((n) => insertNodeInside(n, parentId, newNode)),
+    children: tree.children?.map((n) => insertNodeInside(n, parentId, newNode)),
+  };
 }

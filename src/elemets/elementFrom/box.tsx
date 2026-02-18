@@ -26,7 +26,6 @@ function Box({ data, onChange, name }: BoxProps) {
     resolver: zodResolver(BoxSchema),
     defaultValues: {},
   });
-  console.log(data);
 
   const proprerty = tailwindToStyleObject(data);
   //   console.log("data", proprerty.padding, proprerty);
@@ -45,6 +44,18 @@ function Box({ data, onChange, name }: BoxProps) {
             <AccordionTrigger className="text-white">Layout</AccordionTrigger>
             <AccordionContent>
               <div className="flex flex-col gap-2">
+                <div>
+                  <div className="flex gap-2">
+                    <div>
+                      <label htmlFor="backgroundColor">Background</label>
+                      <Input
+                        type="color"
+                        id="backgroundColor"
+                        {...register("backgroundColor")}
+                      />
+                    </div>
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <div>
                     <label htmlFor="width">Width</label>
@@ -67,7 +78,11 @@ function Box({ data, onChange, name }: BoxProps) {
                     </div>
                     <div>
                       <label htmlFor="margin">Margin</label>
-                      <Input type="text" id="margin" {...register("margin")} />
+                      <Input
+                        type="number"
+                        id="margin"
+                        {...register("margin")}
+                      />
                     </div>
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 import { useEditor } from "@/shared/hooks/editorProvider";
-import BoxForm from "./elementFrom/box";
+import BoxForm from "../../elemets/elementFrom/box";
+import type { ElementNode, StyleKey } from "@/shared/types/elementNode";
 import { mergeTailwindClasses } from "@/lib/helper";
-import type { StyleKey } from "@/shared/types/elementNode";
 type ElementFormProps<T> = {
   data: T;
   onChange: (data: T) => void;
@@ -17,14 +17,41 @@ const componentFactory: ComponentFactory = {
   Box: BoxForm,
 };
 
+function updateNodeClassName(
+  nodes: ElementNode[],
+  id: string,
+  className: string,
+): ElementNode[] {
+  return nodes.map((node) => {
+    if (node.id === id) {
+      return {
+        ...node,
+        props: {
+          ...node.props,
+          className,
+        },
+      };
+    }
+
+    if (node.children?.length) {
+      return {
+        ...node,
+        children: updateNodeClassName(node.children, id, className),
+      };
+    }
+
+    return node;
+  });
+}
+
 function ElementPropertis() {
-  const { selectedElemet } = useEditor();
+  const { selectedElemet, setData } = useEditor();
 
   if (!selectedElemet) return <div>No selection</div>;
 
   const Component =
     componentFactory[(selectedElemet?.element as keyof ComponentFactory) ?? ""];
-  console.log(selectedElemet);
+
   if (!Component) {
     return (
       <div className="justify-center items-center align-middle">
@@ -38,11 +65,15 @@ function ElementPropertis() {
         No editor available
       </div>
     );
-
   const handleUpdate = (data: Partial<Record<StyleKey, string | number>>) => {
-    console.log(
-      mergeTailwindClasses(selectedElemet.props?.className || "", data),
-    );
+    setData((prev) => ({
+      ...prev,
+      layout: updateNodeClassName(
+        prev.layout!,
+        selectedElemet.id!,
+        mergeTailwindClasses(selectedElemet.props?.className || "", data),
+      ),
+    }));
     return;
   };
 
