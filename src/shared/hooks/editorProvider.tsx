@@ -26,7 +26,7 @@ export const EditorProvider = ({
     null,
   );
 
-  // const jsonWithIds = attachIds(initialData || emptyEditorRoot);////can e ysed the case of adding new json form backend
+  ////can e ysed the case of adding new json form backend
 
   return (
     <EditorContext.Provider

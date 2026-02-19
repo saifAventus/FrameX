@@ -1,3 +1,6 @@
+import type GlobalStyleScheme from "@/schema/elemetSchema/globalElemetSchema";
+import type z from "zod";
+
 interface IElementProps {
   className?: string;
   as?: string;
@@ -36,3 +39,11 @@ export type TailwindMapping = {
   prefix: string;
   transform?: (value: string) => number | string;
 };
+export type TGlobalElementProps = z.infer<typeof GlobalStyleScheme>;
+export interface IGlobalElementProps {
+  data: string;
+  onChange: (data: TGlobalElementProps) => void;
+  name: string;
+  text?: string;
+  as?: string;
+}

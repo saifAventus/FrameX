@@ -6,28 +6,12 @@ import {
   insertNodeInside,
   resolveRef,
 } from "@/lib/helper";
+import { elementLibrary } from "@/lib/utils";
 import { useEditor } from "@/shared/hooks/editorProvider";
 import type { ElementNode } from "@/shared/types/elementNode";
-import { Image, Plus, Square, Text } from "lucide-react";
-import { memo } from "react";
+import { Plus } from "lucide-react";
 
-const elementList = [
-  {
-    label: "Box",
-    value: "Box",
-    icon: Square,
-  },
-  {
-    label: "Text",
-    value: "Text",
-    icon: Text,
-  },
-  {
-    label: "Image",
-    value: "Image",
-    icon: Image,
-  },
-];
+import { memo } from "react";
 
 const TreeNode = memo(
   ({
@@ -60,7 +44,7 @@ const TreeNode = memo(
           <span className="text-sm font-medium">Layer</span>
 
           <Dropdown
-            data={elementList}
+            data={elementLibrary}
             Icon={Plus}
             onSelect={(value) => handleAddInside(value)}
           />
@@ -84,13 +68,17 @@ const TreeNode = memo(
           <span className="text-sm font-medium">
             {getDisplayName(effectiveNode)}
           </span>
-
-          <Dropdown
-            data={elementList}
-            classname=""
-            Icon={Plus}
-            onSelect={(value) => handleAddInside(value)}
-          />
+          {elementLibrary.find((item) => item.value === effectiveNode.element)
+            ?.excludeDropDown ? (
+            ""
+          ) : (
+            <Dropdown
+              data={elementLibrary}
+              classname=""
+              Icon={Plus}
+              onSelect={(value) => handleAddInside(value)}
+            />
+          )}
         </div>
 
         {children.map((child, i) => (

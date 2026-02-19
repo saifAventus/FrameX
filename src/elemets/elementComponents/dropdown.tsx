@@ -1,19 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
-type Tdata = {
+export type Tdata = {
   value: string;
   label: string;
   icon: LucideIcon;
 };
 
-interface IDropdown {
+export interface ISelectData {
   data?: Tdata[];
   classname?: string;
-  Icon: LucideIcon;
+  Icon?: LucideIcon;
   onSelect: (value: string) => void;
+  value?: string | number;
+  title?: string;
 }
 
-function Dropdown({ data, Icon, onSelect }: IDropdown) {
+function Dropdown({ data, Icon, onSelect }: ISelectData) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {

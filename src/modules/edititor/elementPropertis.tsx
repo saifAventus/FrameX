@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEditor } from "@/shared/hooks/editorProvider";
 import BoxForm from "../../elemets/elementFrom/box";
-import type { ElementNode, StyleKey } from "@/shared/types/elementNode";
-import { mergeTailwindClasses } from "@/lib/helper";
+import type { StyleKey } from "@/shared/types/elementNode";
+import { mergeTailwindClasses, updateNodeID } from "@/lib/helper";
+import TextForm from "@/elemets/elementFrom/text";
 type ElementFormProps<T> = {
   data: T;
   onChange: (data: T) => void;
@@ -9,40 +11,14 @@ type ElementFormProps<T> = {
 };
 
 type ComponentFactory = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Box: React.FC<ElementFormProps<any>>;
+  Text: React.FC<ElementFormProps<any>>;
 };
 
 const componentFactory: ComponentFactory = {
   Box: BoxForm,
+  Text: TextForm,
 };
-
-function updateNodeClassName(
-  nodes: ElementNode[],
-  id: string,
-  className: string,
-): ElementNode[] {
-  return nodes.map((node) => {
-    if (node.id === id) {
-      return {
-        ...node,
-        props: {
-          ...node.props,
-          className,
-        },
-      };
-    }
-
-    if (node.children?.length) {
-      return {
-        ...node,
-        children: updateNodeClassName(node.children, id, className),
-      };
-    }
-
-    return node;
-  });
-}
 
 function ElementPropertis() {
   const { selectedElemet, setData, data } = useEditor();
@@ -65,18 +41,19 @@ function ElementPropertis() {
         No editor available
       </div>
     );
+
   const handleUpdate = (data: Partial<Record<StyleKey, string | number>>) => {
     setData((prev) => ({
       ...prev,
-      layout: updateNodeClassName(
+      layout: updateNodeID(
         prev.layout!,
         selectedElemet.id!,
         mergeTailwindClasses(selectedElemet.props?.className || "", data),
+        "className",
       ),
     }));
     return;
   };
-  console.log(data);
   return (
     <Component
       data={selectedElemet.props?.className}

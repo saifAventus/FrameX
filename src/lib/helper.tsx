@@ -137,3 +137,36 @@ export function insertNodeInside(
     children: tree.children?.map((n) => insertNodeInside(n, parentId, newNode)),
   };
 }
+
+export function updateNodeID(
+  nodes: ElementNode[],
+  id: string,
+  upadtedData: string,
+  updatedType: "className" | "text",
+): ElementNode[] {
+  return nodes.map((node) => {
+    if (node.id === id) {
+      return {
+        ...node,
+        props: {
+          ...node.props,
+          [updatedType]: upadtedData,
+        },
+      };
+    }
+
+    if (node.children?.length) {
+      return {
+        ...node,
+        [updatedType]: updateNodeID(
+          node.children,
+          id,
+          upadtedData,
+          updatedType,
+        ),
+      };
+    }
+
+    return node;
+  });
+}

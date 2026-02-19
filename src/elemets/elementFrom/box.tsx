@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { z } from "zod";
-import BoxSchema from "@/schema/elemetSchema/boxSchema";
+
+import BoxSchema from "@/schema/elemetSchema/globalElemetSchema";
 import { useEffect } from "react";
 
 import {
@@ -12,23 +12,18 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { tailwindToStyleObject } from "@/lib/helper";
+import type {
+  IGlobalElementProps,
+  TGlobalElementProps,
+} from "@/shared/types/elementNode";
 
-type Box = z.infer<typeof BoxSchema>;
-
-interface BoxProps {
-  data: string;
-  onChange: (data: Box) => void;
-  name: string;
-}
-
-function Box({ data, onChange, name }: BoxProps) {
-  const { register, reset, handleSubmit } = useForm<Box>({
+function Box({ data, onChange, name }: IGlobalElementProps) {
+  const { register, reset, handleSubmit } = useForm<TGlobalElementProps>({
     resolver: zodResolver(BoxSchema),
     defaultValues: {},
   });
 
   const proprerty = tailwindToStyleObject(data);
-  //   console.log("data", proprerty.padding, proprerty);
   useEffect(() => {
     reset(proprerty);
   }, [data]);
@@ -47,7 +42,7 @@ function Box({ data, onChange, name }: BoxProps) {
                 <div>
                   <div className="flex gap-2">
                     <div>
-                      <label htmlFor="backgroundColor">Background</label>
+                      <label htmlFor="backgroundColor">Backgorund Color</label>
                       <Input
                         type="color"
                         id="backgroundColor"

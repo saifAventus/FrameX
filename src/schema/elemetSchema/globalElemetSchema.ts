@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-const BoxSchema = z.object({
+const GlobalStyleScheme = z.object({
   padding: z.union([z.number(), z.string()]).optional(),
   margin: z.union([z.number(), z.string()]).optional(),
   border: z.union([z.number(), z.string()]).optional(),
@@ -16,5 +16,7 @@ const BoxSchema = z.object({
   flexDirection: z.union([z.number(), z.string()]).optional(),
   justifyContent: z.union([z.number(), z.string()]).optional(),
   alignItems: z.union([z.number(), z.string()]).optional(),
+  as: z.string().optional(),
+  text: z.string().optional(),
 });
-export default BoxSchema;
+export default GlobalStyleScheme;
