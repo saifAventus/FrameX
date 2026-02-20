@@ -34,7 +34,6 @@ function renderNode(node: ElementNode): React.ReactNode {
 }
 function PreviewEditor() {
   const { data } = useEditor();
-  console.log("data", data);
   return <div className="h-screen">{data.layout?.map(renderNode)}</div>;
 }
 

@@ -43,6 +43,7 @@ function ElementPropertis() {
     );
 
   const handleUpdate = (data: Partial<Record<StyleKey, string | number>>) => {
+    console.log(data, "teh data is ");
     setData((prev) => ({
       ...prev,
       layout: updateNodeID(
@@ -54,6 +55,7 @@ function ElementPropertis() {
     }));
     return;
   };
+  console.log(data);
   return (
     <Component
       data={selectedElemet.props?.className}

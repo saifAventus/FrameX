@@ -32,7 +32,19 @@ export type StyleKey =
   | "paddingY"
   | "margin"
   | "textAlign"
-  | "backgroundColor";
+  | "backgroundColor"
+  | "color"
+  | "fontSize"
+  | "fontWeight"
+  | "width"
+  | "height"
+  | "borderRadius"
+  | "borderWidth"
+  | "flexDirection"
+  | "justifyContent"
+  | "alignItems"
+  | "display"
+  | "coloum";
 
 export type TailwindMapping = {
   key: StyleKey;
@@ -46,4 +58,24 @@ export interface IGlobalElementProps {
   name: string;
   text?: string;
   as?: string;
+}
+
+export interface StyleTokens {
+  layout?: {
+    display?: "flex" | "block";
+    direction?: "row" | "column";
+    justify?: "start" | "center" | "end" | "between" | "around" | "evenly";
+    align?: "start" | "center" | "end" | "stretch";
+  };
+  spacing?: {
+    p?: number;
+    m?: number;
+  };
+  size?: {
+    w?: string;
+    h?: string;
+  };
+  color?: {
+    bg?: string;
+  };
 }

@@ -3,19 +3,19 @@ import type { LucideIcon } from "lucide-react";
 export type Tdata = {
   value: string;
   label: string;
-  icon: LucideIcon;
+  icon?: LucideIcon;
 };
 
-export interface ISelectData {
+export interface ISelectData<T> {
   data?: Tdata[];
   classname?: string;
   Icon?: LucideIcon;
-  onSelect: (value: string) => void;
-  value?: string | number;
+  onSelect: (value: T) => void;
+  value?: T;
   title?: string;
 }
 
-function Dropdown({ data, Icon, onSelect }: ISelectData) {
+function Dropdown({ data, Icon, onSelect }: ISelectData<string>) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {

@@ -20,3 +20,42 @@ const GlobalStyleScheme = z.object({
   text: z.string().optional(),
 });
 export default GlobalStyleScheme;
+
+// import z from "zod";
+
+// const GlobalStyleSchema = z.object({
+//   padding: z.number().optional(),
+//   margin: z.number().optional(),
+
+//   width: z
+//     .string()
+//     .regex(/^\d+(px|%|rem|vw|vh)$/)
+//     .optional(),
+//   height: z
+//     .string()
+//     .regex(/^\d+(px|%|rem|vw|vh)$/)
+//     .optional(),
+
+//   backgroundColor: z.string().optional(),
+
+//   fontSize: z.enum(["xs", "sm", "base", "lg", "xl", "2xl", "3xl"]).optional(),
+//   fontWeight: z
+//     .enum(["thin", "light", "normal", "medium", "semibold", "bold"])
+//     .optional(),
+
+//   textAlign: z.enum(["left", "center", "right", "justify"]).optional(),
+
+//   flexDirection: z.enum(["row", "column"]).optional(),
+//   justifyContent: z
+//     .enum(["start", "center", "end", "between", "around", "evenly"])
+//     .optional(),
+
+//   alignItems: z.enum(["start", "center", "end", "stretch"]).optional(),
+
+//   borderRadius: z.number().optional(),
+//   border: z.number().optional(),
+
+//   as: z.enum(["div", "span", "p", "section", "article"]).optional(),
+//   text: z.string().optional(),
+// });
+// export default GlobalStyleSchema;

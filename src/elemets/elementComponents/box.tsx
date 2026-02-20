@@ -1,3 +1,5 @@
+import { resolveStyles, tailwindToStyleObject } from "@/lib/helper";
+
 export default function Box({
   children,
   className,
@@ -5,6 +7,15 @@ export default function Box({
   children?: React.ReactNode;
   className?: string;
 }) {
-  console.log(className, "classname");
-  return <div className={`${className} border`}>{children}</div>;
+  const { customClassName, style } = resolveStyles(
+    tailwindToStyleObject(className!),
+  );
+
+  console.log(customClassName, "customClassName");
+
+  return (
+    <div className={`${customClassName} border`} style={style}>
+      {children}
+    </div>
+  );
 }

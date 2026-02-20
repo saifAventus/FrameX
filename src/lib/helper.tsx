@@ -1,4 +1,8 @@
-import type { ElementNode, StyleKey } from "../shared/types/elementNode";
+import type {
+  ElementNode,
+  StyleKey,
+  StyleTokens,
+} from "../shared/types/elementNode";
 import { TAILWIND_MAP } from "./utils";
 
 export const getChildren = (node: ElementNode): ElementNode[] =>
@@ -27,23 +31,62 @@ export function tailwindToStyleObject(
 ): Partial<Record<StyleKey, string | number>> {
   const styles: Partial<Record<StyleKey, string | number>> = {};
 
-  const tokens = className.split(" ").filter(Boolean);
+  const tokens = className.split(/\s+/).filter(Boolean);
 
   for (const token of tokens) {
-    const [prefix, rawValue] = token.split("-");
+    const clean = token.split(":").pop()!;
 
-    const map = TAILWIND_MAP.find((m) => m.prefix === prefix);
-    if (!map || !rawValue) continue;
+    for (const map of TAILWIND_MAP) {
+      if (!clean.startsWith(map.prefix + "-")) continue;
 
-    if (map.key.startsWith("text")) {
-      styles[map.key] = rawValue;
-    } else {
-      const value = Number(rawValue);
-      if (!isNaN(value)) styles[map.key] = value;
+      let raw = clean.slice(map.prefix.length + 1);
+
+      if (raw.startsWith("[")) {
+        raw = raw.slice(1, -1);
+      }
+
+      if (map.key === "textAlign") {
+        styles.textAlign = raw as never;
+        continue;
+      }
+
+      const numeric = Number(raw);
+      styles[map.key] = isNaN(numeric) ? raw : numeric;
     }
   }
 
   return styles;
+}
+
+export function resolveStyles(
+  styles: Partial<Record<StyleKey, string | number>>,
+) {
+  const customClassName: string[] = [];
+  const inline: React.CSSProperties = {};
+
+  for (const [key, value] of Object.entries(styles)) {
+    if (value == null) continue;
+
+    const map = TAILWIND_MAP.find((m) => m.key === key);
+    if (!map) continue;
+
+    if (typeof value === "number") {
+      customClassName.push(`${map.prefix}-${value}`);
+      continue;
+    }
+
+    if (key === "textAlign") {
+      customClassName.push(`text-${value}`);
+      continue;
+    }
+
+    inline[key as any] = value;
+  }
+
+  return {
+    customClassName: customClassName.join(" "),
+    style: inline,
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,6 +101,10 @@ export function attachIds(node: any): ElementNode {
 
   if (node.layout) {
     node.layout = node.layout.map(attachIds);
+  }
+
+  if (node.render) {
+    node.render = node.render.map(attachIds);
   }
 
   return node;
@@ -83,6 +130,10 @@ export function mergeTailwindClasses(
       if (base.startsWith(prefix) || base.startsWith(`${map.prefix}-[`)) {
         result.splice(i, 1);
       }
+    }
+    if (typeof value === "string" && map.prefix === "flex") {
+      result.push(`flex ${map.prefix}-${value}`);
+      continue;
     }
 
     if (typeof value === "string" && value.startsWith("#")) {
@@ -141,7 +192,7 @@ export function insertNodeInside(
 export function updateNodeID(
   nodes: ElementNode[],
   id: string,
-  upadtedData: string,
+  updatedData: string,
   updatedType: "className" | "text",
 ): ElementNode[] {
   return nodes.map((node) => {
@@ -150,7 +201,7 @@ export function updateNodeID(
         ...node,
         props: {
           ...node.props,
-          [updatedType]: upadtedData,
+          [updatedType]: updatedData,
         },
       };
     }
@@ -158,15 +209,106 @@ export function updateNodeID(
     if (node.children?.length) {
       return {
         ...node,
-        [updatedType]: updateNodeID(
-          node.children,
-          id,
-          upadtedData,
-          updatedType,
-        ),
+        children: updateNodeID(node.children, id, updatedData, updatedType),
       };
     }
 
     return node;
   });
+}
+
+export function tailwindToTokens(className: string): StyleTokens {
+  const tokens = className.split(/\s+/).filter(Boolean);
+  const out: StyleTokens = {};
+
+  for (const t of tokens) {
+    if (t === "flex") {
+      out.layout ??= {};
+      out.layout.display = "flex";
+      continue;
+    }
+
+    if (t === "flex-row") {
+      out.layout ??= {};
+      out.layout.direction = "row";
+      continue;
+    }
+
+    if (t === "flex-col") {
+      out.layout ??= {};
+      out.layout.direction = "column";
+      continue;
+    }
+
+    if (t.startsWith("justify-")) {
+      out.layout ??= {};
+      out.layout.justify = t.replace("justify-", "") as any;
+      continue;
+    }
+
+    if (t.startsWith("items-")) {
+      out.layout ??= {};
+      out.layout.align = t.replace("items-", "") as any;
+      continue;
+    }
+
+    if (t.startsWith("p-")) {
+      out.spacing ??= {};
+      out.spacing.p = Number(t.replace("p-", ""));
+      continue;
+    }
+
+    if (t.startsWith("m-")) {
+      out.spacing ??= {};
+      out.spacing.m = Number(t.replace("m-", ""));
+      continue;
+    }
+
+    if (t.startsWith("w-[")) {
+      out.size ??= {};
+      out.size.w = t.slice(3, -1);
+      continue;
+    }
+
+    if (t.startsWith("h-[")) {
+      out.size ??= {};
+      out.size.h = t.slice(3, -1);
+      continue;
+    }
+
+    if (t.startsWith("bg-[")) {
+      out.color ??= {};
+      out.color.bg = t.slice(4, -1);
+      continue;
+    }
+  }
+
+  return out;
+}
+
+export function tokensToTailwind(tokens: StyleTokens): string {
+  const out: string[] = [];
+
+  if (tokens.layout?.display === "flex") {
+    out.push("flex");
+
+    if (tokens.layout.direction === "row") out.push("flex-row");
+    if (tokens.layout.direction === "column") out.push("flex-col");
+
+    if (tokens.layout.justify) out.push(`justify-${tokens.layout.justify}`);
+
+    if (tokens.layout.align) out.push(`items-${tokens.layout.align}`);
+  }
+
+  if (tokens.spacing?.p) out.push(`p-${tokens.spacing.p}`);
+
+  if (tokens.spacing?.m) out.push(`m-${tokens.spacing.m}`);
+
+  if (tokens.size?.w) out.push(`w-[${tokens.size.w}]`);
+
+  if (tokens.size?.h) out.push(`h-[${tokens.size.h}]`);
+
+  if (tokens.color?.bg) out.push(`bg-[${tokens.color.bg}]`);
+
+  return out.join(" ");
 }
