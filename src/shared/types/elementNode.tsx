@@ -1,7 +1,7 @@
 import type GlobalStyleScheme from "@/schema/elemetSchema/globalElemetSchema";
 import type z from "zod";
 
-interface IElementProps {
+export interface IElementProps {
   className?: string;
   as?: string;
   value?: string;

@@ -1,23 +1,17 @@
 import * as z from "zod";
 
 const GlobalStyleScheme = z.object({
-  padding: z.union([z.number(), z.string()]).optional(),
-  margin: z.union([z.number(), z.string()]).optional(),
-  border: z.union([z.number(), z.string()]).optional(),
-  borderRadius: z.union([z.number(), z.string()]).optional(),
-  boxShadow: z.union([z.number(), z.string()]).optional(),
-  backgroundColor: z.union([z.number(), z.string()]).optional(),
-  color: z.union([z.number(), z.string()]).optional(),
-  fontSize: z.union([z.number(), z.string()]).optional(),
-  fontWeight: z.union([z.number(), z.string()]).optional(),
-  textAlign: z.union([z.number(), z.string()]).optional(),
-  width: z.union([z.number(), z.string()]).optional(),
-  height: z.union([z.number(), z.string()]).optional(),
-  flexDirection: z.union([z.number(), z.string()]).optional(),
-  justifyContent: z.union([z.number(), z.string()]).optional(),
-  alignItems: z.union([z.number(), z.string()]).optional(),
-  as: z.string().optional(),
-  text: z.string().optional(),
+  p: z.union([z.number(), z.string()]).optional(),
+  m: z.union([z.number(), z.string()]).optional(),
+  b: z.union([z.number(), z.string()]).optional(),
+  h: z.union([z.number(), z.string()]).optional(),
+  w: z.union([z.number(), z.string()]).optional(),
+  radious: z.union([z.number(), z.string()]).optional(),
+  flex: z.union([z.number(), z.string()]).optional(),
+  justify: z.union([z.number(), z.string()]).optional(),
+  align: z.union([z.number(), z.string()]).optional(),
+  bg: z.union([z.number(), z.string()]).optional(),
+  text: z.union([z.number(), z.string()]).optional(),
 });
 export default GlobalStyleScheme;
 

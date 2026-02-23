@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEditor } from "@/shared/hooks/editorProvider";
-import BoxForm from "../../elemets/elementFrom/box";
-import type { StyleKey } from "@/shared/types/elementNode";
-import { mergeTailwindClasses, updateNodeID } from "@/lib/helper";
+import BoxForm, {
+  buildTailwindFromForm,
+  type LayoutForm,
+} from "../../elemets/elementFrom/box";
+import { updateNodeID } from "@/lib/helper";
 import TextForm from "@/elemets/elementFrom/text";
 type ElementFormProps<T> = {
   data: T;
@@ -42,14 +44,14 @@ function ElementPropertis() {
       </div>
     );
 
-  const handleUpdate = (data: Partial<Record<StyleKey, string | number>>) => {
+  const handleUpdate = (data: LayoutForm) => {
     console.log(data, "teh data is ");
     setData((prev) => ({
       ...prev,
       layout: updateNodeID(
         prev.layout!,
         selectedElemet.id!,
-        mergeTailwindClasses(selectedElemet.props?.className || "", data),
+        buildTailwindFromForm(data, selectedElemet.props?.className || ""),
         "className",
       ),
     }));

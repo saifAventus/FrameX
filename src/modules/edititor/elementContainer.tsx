@@ -54,7 +54,6 @@ const TreeNode = memo(
 
     const resolved = resolveRef(node.$ref, definitions);
     const effectiveNode = resolved ?? node;
-
     const children = getChildren(effectiveNode);
     return (
       <div>
@@ -63,7 +62,11 @@ const TreeNode = memo(
             setSelectedElement(effectiveNode);
           }}
           style={{ paddingLeft: depth * 14 }}
-          className="flex items-center justify-between gap-2 py-1 cursor-pointer hover:bg-blue-50 rounded-md"
+          className={
+            effectiveNode.id === selectedElemet?.id
+              ? "flex items-center justify-between gap-2  cursor-pointer  rounded-md bg-blue-50 px-2"
+              : "flex items-center justify-between gap-2 py-1 cursor-pointer rounded-md  hover:border hover:border-blue-50 px-2"
+          }
         >
           <span className="text-sm font-medium">
             {getDisplayName(effectiveNode)}
@@ -98,7 +101,7 @@ function ElementContainer() {
   const { data } = useEditor();
   return (
     <div className="h-screen border-r bg-white">
-      <div className="p-2  h-[calc(100vh-64px)] overflow-y-scroll scrollbar-xs">
+      <div className="p-2  h-[calc(100vh-64px)] overflow-y-scroll scrollbar-xs gap-2">
         <TreeNode node={data} definitions={data.definitions} depth={0} />
       </div>
     </div>

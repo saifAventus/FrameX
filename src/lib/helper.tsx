@@ -55,13 +55,13 @@ export function tailwindToStyleObject(
     }
   }
 
+  console.log(styles, "styles");
   return styles;
 }
 
 export function resolveStyles(
   styles: Partial<Record<StyleKey, string | number>>,
 ) {
-  const customClassName: string[] = [];
   const inline: React.CSSProperties = {};
 
   for (const [key, value] of Object.entries(styles)) {
@@ -69,47 +69,25 @@ export function resolveStyles(
 
     const map = TAILWIND_MAP.find((m) => m.key === key);
     if (!map) continue;
-
-    if (typeof value === "number") {
-      customClassName.push(`${map.prefix}-${value}`);
+    if (map.key === "backgroundColor") {
+      inline[key as any] = value;
       continue;
     }
-
-    if (key === "textAlign") {
-      customClassName.push(`text-${value}`);
+    if (map.key === "width") {
+      inline[key as any] = value;
       continue;
     }
-
+    if (map.key === "height") {
+      inline[key as any] = value;
+      continue;
+    }
     inline[key as any] = value;
   }
 
   return {
-    customClassName: customClassName.join(" "),
     style: inline,
   };
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function attachIds(node: any): ElementNode {
-  if (!node.id) {
-    node.id = crypto.randomUUID();
-  }
-
-  if (node.children) {
-    node.children = node.children.map(attachIds);
-  }
-
-  if (node.layout) {
-    node.layout = node.layout.map(attachIds);
-  }
-
-  if (node.render) {
-    node.render = node.render.map(attachIds);
-  }
-
-  return node;
-}
-
 export function mergeTailwindClasses(
   existing: string,
   updates: Partial<Record<StyleKey, string | number>>,
@@ -150,6 +128,27 @@ export function mergeTailwindClasses(
   }
 
   return result.join(" ");
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function attachIds(node: any): ElementNode {
+  if (!node.id) {
+    node.id = crypto.randomUUID();
+  }
+
+  if (node.children) {
+    node.children = node.children.map(attachIds);
+  }
+
+  if (node.layout) {
+    node.layout = node.layout.map(attachIds);
+  }
+
+  if (node.render) {
+    node.render = node.render.map(attachIds);
+  }
+
+  return node;
 }
 
 export function createNode(element: string): ElementNode {

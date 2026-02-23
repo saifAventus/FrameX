@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import type { ElementNode } from "../types/elementNode";
+import pageEditorService from "@/srevice/pageEdititor/pageEdititorService";
 interface EditorContextState {
   data: ElementNode;
   setData: React.Dispatch<React.SetStateAction<ElementNode>>;
@@ -25,6 +26,20 @@ export const EditorProvider = ({
   const [selectedElemet, setSelectedElement] = useState<ElementNode | null>(
     null,
   );
+
+  const handelApiCall = async () => {
+    try {
+      const response = (await pageEditorService.updateJson(data)).data;
+
+      console.log("the jsosn is s", response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    handelApiCall();
+  }, [data]);
 
   ////can e ysed the case of adding new json form backend
 

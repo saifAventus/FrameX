@@ -19,17 +19,72 @@ import type {
 import MultiChoiceChip from "../elementComponents/muiltiChoiceChip";
 import Dropdown from "../elementComponents/dropdown";
 
+export interface LayoutForm {
+  p?: number;
+  m?: number;
+  // flexDirection?: "row" | "column";
+  // justifyContent?: string;
+  // alignItems?: string;
+  w?: string;
+  h?: string;
+  // backgroundColor?: string;
+}
+
+const CLASS_PREFIX = ["p-", "m-", "w-[", "h-["];
+
+export function buildTailwindFromForm(
+  form: LayoutForm,
+  existing: string,
+): string {
+  const tokens = existing.split(/\s+/).filter(Boolean);
+
+  // remove only controlled classes
+  const cleaned = tokens.filter((cls) => {
+    return !CLASS_PREFIX.some((prefix) => cls.startsWith(prefix));
+  });
+
+  if (form.p !== undefined) cleaned.push(`p-${form.p}`);
+  if (form.m !== undefined) cleaned.push(`m-${form.m}`);
+  if (form.w) cleaned.push(`w-${form.w}`);
+  if (form.h) cleaned.push(`h-${form.h}`);
+
+  return cleaned.join(" ");
+}
+
+export function parseTailwindToForm(className: string) {
+  const form: LayoutForm = {};
+
+  const tokens = className.split(/\s+/);
+
+  for (const t of tokens) {
+    if (t.startsWith("p-")) form.p = Number(t.slice(2));
+    if (t.startsWith("m-")) form.m = Number(t.slice(2));
+
+    // if (t === "flex-row") form.flexDirection = "row";
+    // if (t === "flex-col") form.flexDirection = "column";
+
+    // if (t.startsWith("justify-"))
+    //   form.justifyContent = t.replace("justify-", "");
+    // if (t.startsWith("items-")) form.alignItems = t.replace("items-", "");
+
+    if (t.startsWith("w-")) form.w = t.slice(2);
+    if (t.startsWith("h-")) form.h = t.slice(2);
+
+    // if (t.startsWith("bg-[")) form.backgroundColor = t.slice(4, -1);
+  }
+
+  return form;
+}
+
 function Box({ data, onChange, name }: IGlobalElementProps) {
-  const { register, reset, handleSubmit, control } =
+  const { register, reset, handleSubmit, control, watch } =
     useForm<TGlobalElementProps>({
       resolver: zodResolver(BoxSchema),
       defaultValues: {},
     });
 
-  const proprerty = tailwindToStyleObject(data);
-
   useEffect(() => {
-    reset(proprerty);
+    reset(parseTailwindToForm(data!));
   }, [data]);
 
   return (
@@ -46,49 +101,29 @@ function Box({ data, onChange, name }: IGlobalElementProps) {
                 <div>
                   <div className="flex gap-2">
                     <div>
-                      <label htmlFor="backgroundColor">Backgorund Color</label>
-                      <Input
-                        type="color"
-                        id="backgroundColor"
-                        {...register("backgroundColor")}
-                      />
+                      <label htmlFor="p">Padding</label>
+                      <Input type="number" id="p" {...register("p")} />
+                    </div>
+                    <div>
+                      <label htmlFor="m">Margin</label>
+                      <Input type="number" id="m" {...register("m")} />
                     </div>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <div>
-                    <label htmlFor="width">Width</label>
-                    <Input type="text" id="width" {...register("width")} />
+                    <label htmlFor="w">Width</label>
+                    <Input type="text" id="w" {...register("w")} />
                   </div>
                   <div>
-                    <label htmlFor="height">Height</label>
-                    <Input type="text" id="height" {...register("height")} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex gap-2">
-                    <div>
-                      <label htmlFor="padding">Padding</label>
-                      <Input
-                        type="number"
-                        id="padding"
-                        {...register("padding")}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="margin">Margin</label>
-                      <Input
-                        type="number"
-                        id="margin"
-                        {...register("margin")}
-                      />
-                    </div>
+                    <label htmlFor="h">Height</label>
+                    <Input type="text" id="h" {...register("h")} />
                   </div>
                 </div>
               </div>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="Position">
+          {/* <AccordionItem value="Position">
             <AccordionTrigger className="text-black">Position</AccordionTrigger>
             <AccordionContent>
               <div className="flex flex-col gap-2">
@@ -132,7 +167,7 @@ function Box({ data, onChange, name }: IGlobalElementProps) {
                 </div>
               </div>
             </AccordionContent>
-          </AccordionItem>
+          </AccordionItem> */}
         </Accordion>
       </form>
     </div>

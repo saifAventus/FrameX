@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./tailwind.sources.css";
 
 @tailwind utilities;
 
