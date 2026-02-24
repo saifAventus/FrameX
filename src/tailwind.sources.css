@@ -1,0 +1,38 @@
+/* 
+  Tailwind v4: Force-generate dynamic utility classes that are built at runtime.
+  These are classes assembled in JS (e.g. `w-[200px]`, `bg-[#ff0000]`) 
+  that Tailwind's scanner cannot detect statically.
+
+  We use `@source inline(...)` with a SINGLE quoted string of brace-expanded patterns.
+*/
+
+/* Layout */
+/* @source inline("flex flex-row flex-col grid block hidden"); */
+
+/* Spacing */
+/* @source inline("p-{1,2,3,4,5,6,8,10,12,16} m-{1,2,3,4,5,6,8,10,12,16}"); */
+
+/* Alignment */
+/* @source inline("items-{center,start,end,stretch} justify-{center,between,start,end,around,evenly}"); */
+
+/* Sizing (fixed Tailwind scale) */
+/* @source inline("w-{full,auto,1,2,4,8,12,16,24,32,48,64} h-{full,auto,1,2,4,8,12,16,24,32,48,64}"); */
+
+/* Colors (Tailwind palette) */
+/* @source inline("bg-{red,blue,green,yellow,purple,gray,white,black}-{50,100,200,300,400,500,600,700,800,900}");
+@source inline("text-{white,black,sm,base,lg,xl,2xl} text-{red,blue,green,gray}-{500,700}"); */
+
+/* Borders */
+/* @source inline("border border-dashed border-{gray,red,blue}-{200,300,400,500}");
+@source inline("rounded rounded-{sm,md,lg,xl,2xl,full}"); */
+
+/*
+  For TRULY dynamic arbitrary values like w-[200px] or bg-[#ff3300],
+  Tailwind v4 with @tailwindcss/vite detects these automatically IF
+  the class string appears in a scanned source file (TSX/TS).
+  
+  Make sure your vite.config.ts is scanning src/ (it does by default).
+  Dynamic classes stored in state/constants will be detected fine.
+*/
+
+@source inline("{underline,p-{1,2,3,4,5,6},m-{1,2,3,4,5,6},bg-{red,blue,green}-500,bg-{black,white},text-{white,black,sm,base,lg,xl},flex,grid,block,hidden,items-{center,start,end},justify-{center,between,start,end},w-full,h-full,w-50,h-50}");

@@ -3,13 +3,13 @@ import {
   createNode,
   getChildren,
   getDisplayName,
-  insertNodeInside,
   resolveRef,
 } from "@/lib/helper";
 import { elementLibrary } from "@/lib/utils";
 import { useEditor } from "@/shared/hooks/editorProvider";
 import type { ElementNode } from "@/shared/types/elementNode";
-import { Plus } from "lucide-react";
+import pageEditorService from "@/srevice/pageEdititor/pageEdititorService";
+import { Plus, Trash } from "lucide-react";
 
 import { memo } from "react";
 
@@ -24,12 +24,21 @@ const TreeNode = memo(
     definitions?: Record<string, any>;
     depth: number;
   }) => {
-    const { setData, selectedElemet, setSelectedElement } = useEditor();
+    const { selectedElement, setSelectedElement, handleReRender } = useEditor();
 
-    const handleAddInside = (type: string) => {
-      if (!selectedElemet) return;
+    const handleAddInside = async (type: string) => {
+      if (!selectedElement) return;
       const newNode = createNode(type);
-      setData((prev) => insertNodeInside(prev, selectedElemet.id!, newNode));
+      try {
+        const response = await pageEditorService.addJson({
+          parentId: selectedElement.id!,
+          newNode,
+        });
+        console.log(response);
+        handleReRender();
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     if (!Object.keys(node).length) {
@@ -55,6 +64,16 @@ const TreeNode = memo(
     const resolved = resolveRef(node.$ref, definitions);
     const effectiveNode = resolved ?? node;
     const children = getChildren(effectiveNode);
+
+    const handleDelete = async () => {
+      try {
+        const response = await pageEditorService.deleteJson(effectiveNode.id!);
+        console.log(response);
+        handleReRender();
+      } catch (error) {
+        console.error(error);
+      }
+    };
     return (
       <div>
         <div
@@ -63,7 +82,7 @@ const TreeNode = memo(
           }}
           style={{ paddingLeft: depth * 14 }}
           className={
-            effectiveNode.id === selectedElemet?.id
+            effectiveNode.id === selectedElement?.id
               ? "flex items-center justify-between gap-2  cursor-pointer  rounded-md bg-blue-50 px-2"
               : "flex items-center justify-between gap-2 py-1 cursor-pointer rounded-md  hover:border hover:border-blue-50 px-2"
           }
@@ -71,6 +90,9 @@ const TreeNode = memo(
           <span className="text-sm font-medium">
             {getDisplayName(effectiveNode)}
           </span>
+          <button onClick={handleDelete}>
+            <Trash />
+          </button>
           {elementLibrary.find((item) => item.value === effectiveNode.element)
             ?.excludeDropDown ? (
             ""

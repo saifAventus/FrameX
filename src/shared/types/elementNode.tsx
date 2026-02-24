@@ -54,7 +54,7 @@ export type TailwindMapping = {
 export type TGlobalElementProps = z.infer<typeof GlobalStyleScheme>;
 export interface IGlobalElementProps {
   data: string;
-  onChange: (data: TGlobalElementProps) => void;
+  onChange: (data: string) => void;
   name: string;
   text?: string;
   as?: string;

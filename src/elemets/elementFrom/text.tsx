@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { tailwindToStyleObject } from "@/lib/helper";
+import { handleStringConversion, parseTailwindToForm } from "@/lib/helper";
 import GlobalStyleScheme from "@/schema/elemetSchema/globalElemetSchema";
 import type {
   IGlobalElementProps,
@@ -22,18 +22,23 @@ function TextForm({ data, onChange, name }: IGlobalElementProps) {
     defaultValues: {},
   });
 
-  const proprerty = tailwindToStyleObject(data);
-
   useEffect(() => {
-    reset(proprerty);
+    reset(parseTailwindToForm(data!));
   }, [data]);
+
+  const handleUpdate = (formData: TGlobalElementProps) => {
+    onChange(handleStringConversion(formData, data));
+  };
 
   return (
     <div className="p-2">
       <div>
         <h1>{name}</h1>
       </div>
-      <form className="flex flex-col gap-2" onChange={handleSubmit(onChange)}>
+      <form
+        className="flex flex-col gap-2"
+        onChange={handleSubmit((formData) => handleUpdate(formData))}
+      >
         <Accordion defaultValue={["shipping"]} type="multiple">
           <AccordionItem value="shipping">
             <AccordionTrigger className="text-white">Layout</AccordionTrigger>
@@ -41,7 +46,7 @@ function TextForm({ data, onChange, name }: IGlobalElementProps) {
               <div>
                 <label htmlFor="textAlign">data</label>
                 <Controller
-                  name="textAlign"
+                  name="align"
                   control={control}
                   render={({ field }) => (
                     <MultiChoiceChip

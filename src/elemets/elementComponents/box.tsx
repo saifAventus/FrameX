@@ -1,5 +1,4 @@
-import { resolveStyles, tailwindToStyleObject } from "@/lib/helper";
-
+import { twj } from "tw-to-css";
 export default function Box({
   children,
   className,
@@ -7,9 +6,13 @@ export default function Box({
   children?: React.ReactNode;
   className?: string;
 }) {
-  const { style } = resolveStyles(tailwindToStyleObject(className!));
+  // const { style } = resolveStyles(tailwindToStyleObject(className!));
 
-  console.log(style, "style", className);
+  const styleInline = twj(`${className}`);
 
-  return <div className={`${className} border`}>{children}</div>;
+  return (
+    <div className={`${className} border`} style={styleInline}>
+      {children}
+    </div>
+  );
 }

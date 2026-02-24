@@ -1,7 +1,8 @@
+import { twMerge } from "tailwind-merge";
 import type {
   ElementNode,
   StyleKey,
-  StyleTokens,
+  TGlobalElementProps,
 } from "../shared/types/elementNode";
 import { TAILWIND_MAP } from "./utils";
 
@@ -55,7 +56,6 @@ export function tailwindToStyleObject(
     }
   }
 
-  console.log(styles, "styles");
   return styles;
 }
 
@@ -87,47 +87,6 @@ export function resolveStyles(
   return {
     style: inline,
   };
-}
-export function mergeTailwindClasses(
-  existing: string,
-  updates: Partial<Record<StyleKey, string | number>>,
-) {
-  const tokens = existing.split(/\s+/).filter(Boolean);
-  const result = [...tokens];
-
-  for (const [key, value] of Object.entries(updates)) {
-    if (value == null) continue;
-
-    const map = TAILWIND_MAP.find((m) => m.key === key);
-    if (!map) continue;
-
-    const prefix = map.prefix + "-";
-
-    for (let i = result.length - 1; i >= 0; i--) {
-      const base = result[i].split(":").pop()!;
-      if (base.startsWith(prefix) || base.startsWith(`${map.prefix}-[`)) {
-        result.splice(i, 1);
-      }
-    }
-    if (typeof value === "string" && map.prefix === "flex") {
-      result.push(`flex ${map.prefix}-${value}`);
-      continue;
-    }
-
-    if (typeof value === "string" && value.startsWith("#")) {
-      result.push(`${map.prefix}-[${value}]`);
-      continue;
-    }
-
-    if (typeof value === "string" && value.endsWith("px")) {
-      result.push(`${map.prefix}-[${value}]`);
-      continue;
-    }
-
-    result.push(`${map.prefix}-${value}`);
-  }
-
-  return result.join(" ");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -162,31 +121,31 @@ export function createNode(element: string): ElementNode {
   };
 }
 
-export function insertNodeInside(
-  tree: ElementNode,
-  parentId: string,
-  newNode: ElementNode,
-): ElementNode {
-  if (tree.id === parentId && tree.id === "root") {
-    return {
-      ...tree,
-      layout: [...(tree.layout || []), newNode],
-    };
-  }
+// export function insertNodeInside(
+//   tree: ElementNode,
+//   parentId: string,
+//   newNode: ElementNode,
+// ): ElementNode {
+//   if (tree.id === parentId && tree.id === "root") {
+//     return {
+//       ...tree,
+//       layout: [...(tree.layout || []), newNode],
+//     };
+//   }
 
-  if (tree.id === parentId) {
-    return {
-      ...tree,
-      children: [...(tree.children || []), newNode],
-    };
-  }
+//   if (tree.id === parentId) {
+//     return {
+//       ...tree,
+//       children: [...(tree.children || []), newNode],
+//     };
+//   }
 
-  return {
-    ...tree,
-    layout: tree.layout?.map((n) => insertNodeInside(n, parentId, newNode)),
-    children: tree.children?.map((n) => insertNodeInside(n, parentId, newNode)),
-  };
-}
+//   return {
+//     ...tree,
+//     layout: tree.layout?.map((n) => insertNodeInside(n, parentId, newNode)),
+//     children: tree.children?.map((n) => insertNodeInside(n, parentId, newNode)),
+//   };
+// }
 
 export function updateNodeID(
   nodes: ElementNode[],
@@ -216,98 +175,54 @@ export function updateNodeID(
   });
 }
 
-export function tailwindToTokens(className: string): StyleTokens {
-  const tokens = className.split(/\s+/).filter(Boolean);
-  const out: StyleTokens = {};
+export const handleStringConversion = (
+  data: TGlobalElementProps,
+  classname: string,
+) => {
+  const utilities: string[] = [];
+
+  for (const key in data) {
+    const value = data[key as keyof TGlobalElementProps];
+    if (value === undefined || value === "") continue;
+
+    if (
+      typeof value === "string" &&
+      (value.includes("[") || value.includes("#"))
+    ) {
+      utilities.push(`${key}-[${value}]`);
+    } else if (key === "flexDirection") {
+      utilities.push(`flex ${value}`);
+    } else {
+      utilities.push(`${key}-${value}`);
+    }
+  }
+
+  return twMerge(classname, ...utilities);
+};
+
+export interface LayoutForm {
+  p?: number;
+  m?: number;
+  // flexDirection?: "row" | "column";
+  // justifyContent?: string;
+  // alignItems?: string;
+  w?: string;
+  h?: string;
+  // backgroundColor?: string;
+}
+
+export const parseTailwindToForm = (className: string) => {
+  const form: LayoutForm = {};
+
+  const tokens = className.split(/\s+/);
 
   for (const t of tokens) {
-    if (t === "flex") {
-      out.layout ??= {};
-      out.layout.display = "flex";
-      continue;
-    }
+    if (t.startsWith("p-")) form.p = Number(t.slice(2));
+    if (t.startsWith("m-")) form.m = Number(t.slice(2));
 
-    if (t === "flex-row") {
-      out.layout ??= {};
-      out.layout.direction = "row";
-      continue;
-    }
-
-    if (t === "flex-col") {
-      out.layout ??= {};
-      out.layout.direction = "column";
-      continue;
-    }
-
-    if (t.startsWith("justify-")) {
-      out.layout ??= {};
-      out.layout.justify = t.replace("justify-", "") as any;
-      continue;
-    }
-
-    if (t.startsWith("items-")) {
-      out.layout ??= {};
-      out.layout.align = t.replace("items-", "") as any;
-      continue;
-    }
-
-    if (t.startsWith("p-")) {
-      out.spacing ??= {};
-      out.spacing.p = Number(t.replace("p-", ""));
-      continue;
-    }
-
-    if (t.startsWith("m-")) {
-      out.spacing ??= {};
-      out.spacing.m = Number(t.replace("m-", ""));
-      continue;
-    }
-
-    if (t.startsWith("w-[")) {
-      out.size ??= {};
-      out.size.w = t.slice(3, -1);
-      continue;
-    }
-
-    if (t.startsWith("h-[")) {
-      out.size ??= {};
-      out.size.h = t.slice(3, -1);
-      continue;
-    }
-
-    if (t.startsWith("bg-[")) {
-      out.color ??= {};
-      out.color.bg = t.slice(4, -1);
-      continue;
-    }
+    if (t.startsWith("w-")) form.w = t.slice(2);
+    if (t.startsWith("h-")) form.h = t.slice(2);
   }
 
-  return out;
-}
-
-export function tokensToTailwind(tokens: StyleTokens): string {
-  const out: string[] = [];
-
-  if (tokens.layout?.display === "flex") {
-    out.push("flex");
-
-    if (tokens.layout.direction === "row") out.push("flex-row");
-    if (tokens.layout.direction === "column") out.push("flex-col");
-
-    if (tokens.layout.justify) out.push(`justify-${tokens.layout.justify}`);
-
-    if (tokens.layout.align) out.push(`items-${tokens.layout.align}`);
-  }
-
-  if (tokens.spacing?.p) out.push(`p-${tokens.spacing.p}`);
-
-  if (tokens.spacing?.m) out.push(`m-${tokens.spacing.m}`);
-
-  if (tokens.size?.w) out.push(`w-[${tokens.size.w}]`);
-
-  if (tokens.size?.h) out.push(`h-[${tokens.size.h}]`);
-
-  if (tokens.color?.bg) out.push(`bg-[${tokens.color.bg}]`);
-
-  return out.join(" ");
-}
+  return form;
+};

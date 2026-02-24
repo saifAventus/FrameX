@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEditor } from "@/shared/hooks/editorProvider";
-import BoxForm, {
-  buildTailwindFromForm,
-  type LayoutForm,
-} from "../../elemets/elementFrom/box";
-import { updateNodeID } from "@/lib/helper";
+
+import BoxForm from "../../elemets/elementFrom/box";
 import TextForm from "@/elemets/elementFrom/text";
+import { useEditor } from "@/shared/hooks/editorProvider";
+import pageEditorService from "@/srevice/pageEdititor/pageEdititorService";
 type ElementFormProps<T> = {
   data: T;
   onChange: (data: T) => void;
@@ -23,12 +21,14 @@ const componentFactory: ComponentFactory = {
 };
 
 function ElementPropertis() {
-  const { selectedElemet, setData, data } = useEditor();
+  const { selectedElement, handleReRender } = useEditor();
 
-  if (!selectedElemet) return <div>No selection</div>;
+  if (!selectedElement) return <div>No selection</div>;
 
   const Component =
-    componentFactory[(selectedElemet?.element as keyof ComponentFactory) ?? ""];
+    componentFactory[
+      (selectedElement?.element as keyof ComponentFactory) ?? ""
+    ];
 
   if (!Component) {
     return (
@@ -37,32 +37,33 @@ function ElementPropertis() {
       </div>
     );
   }
-  if (!selectedElemet.props?.className)
+  if (!selectedElement.props?.className)
     return (
       <div className="justify-center items-center align-middle">
         No editor available
       </div>
     );
 
-  const handleUpdate = (data: LayoutForm) => {
-    console.log(data, "teh data is ");
-    setData((prev) => ({
-      ...prev,
-      layout: updateNodeID(
-        prev.layout!,
-        selectedElemet.id!,
-        buildTailwindFromForm(data, selectedElemet.props?.className || ""),
-        "className",
-      ),
-    }));
-    return;
+  const handleUpdate = async (className: string) => {
+    try {
+      const response = await pageEditorService.updateJson({
+        id: selectedElement.id!,
+        updated: className,
+        elementType: "className",
+      });
+
+      console.log(response);
+      handleReRender();
+    } catch (error) {
+      console.error(error);
+    }
   };
-  console.log(data);
+
   return (
     <Component
-      data={selectedElemet.props?.className}
+      data={selectedElement.props?.className}
       onChange={handleUpdate}
-      name={selectedElemet.element!}
+      name={selectedElement.element!}
     />
   );
 }

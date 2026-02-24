@@ -1,10 +1,10 @@
 import Box from "@/elemets/elementComponents/box";
 import Text from "@/elemets/elementComponents/text";
-import { useEditor } from "@/shared/hooks/editorProvider";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import type { ElementNode } from "@/shared/types/elementNode";
-import pageEditorService from "@/srevice/pageEdititor/pageEdititorService";
 type ElementType = "Box" | "Text";
+
+import jsconfig from "../../../../FarmeXBackend/src/assets/dummy.json";
 
 export interface ElementComponentProps {
   id?: string;
@@ -34,26 +34,23 @@ function renderNode(node: ElementNode): React.ReactNode {
   );
 }
 function PreviewEditor() {
-  const { data } = useEditor();
-  const [perveData, setPerviewData] = useState<ElementNode>();
+  // const { data } = useEditor();
+  // const [perveData, setPerviewData] = useState<ElementNode>();
 
-  const fetchJson = async () => {
-    try {
-      const response = await pageEditorService.fetchJson();
-      console.log("the response is ", response);
-      setPerviewData(response.data.result);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const fetchJson = async () => {
+  //   try {
+  //     const response = await pageEditorService.fetchJson();
+  //     setPerviewData(response.data.result);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
-  useEffect(() => {
-    console.log("the data is ", data);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchJson();
-  }, [data]);
-  console.log("the perve data is ", perveData);
-  return <div className="h-screen">{perveData?.layout?.map(renderNode)}</div>;
+  // useEffect(() => {
+  //   // eslint-disable-next-line react-hooks/set-state-in-effect
+  //   fetchJson();
+  // }, [data]);
+  return <div className="h-screen">{jsconfig?.layout?.map(renderNode)}</div>;
 }
 
 export default PreviewEditor;

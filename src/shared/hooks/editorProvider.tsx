@@ -1,12 +1,15 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import type { ElementNode } from "../types/elementNode";
 import pageEditorService from "@/srevice/pageEdititor/pageEdititorService";
+import { createContext, useContext, useEffect, useState } from "react";
+import type { ElementNode } from "../types/elementNode";
+
 interface EditorContextState {
   data: ElementNode;
   setData: React.Dispatch<React.SetStateAction<ElementNode>>;
-  selectedElemet: ElementNode | null;
+  selectedElement: ElementNode | null;
   setSelectedElement: React.Dispatch<React.SetStateAction<ElementNode | null>>;
+  handleReRender: () => void;
 }
+
 const emptyEditorRoot: ElementNode = {
   id: "root",
   element: "page",
@@ -15,41 +18,42 @@ const emptyEditorRoot: ElementNode = {
 
 const EditorContext = createContext<EditorContextState | null>(null);
 
-export const EditorProvider = ({
-  initialData,
-  children,
-}: {
-  initialData?: ElementNode;
-  children: React.ReactNode;
-}) => {
-  const [data, setData] = useState<ElementNode>(initialData || emptyEditorRoot);
-  const [selectedElemet, setSelectedElement] = useState<ElementNode | null>(
+export const EditorProvider = ({ children }: { children: React.ReactNode }) => {
+  const [data, setData] = useState<ElementNode>(emptyEditorRoot);
+  const [selectedElement, setSelectedElement] = useState<ElementNode | null>(
     null,
   );
 
-  const handelApiCall = async () => {
-    try {
-      const response = (await pageEditorService.updateJson(data)).data;
+  const [reRender, setReRender] = useState(false);
 
-      console.log("the jsosn is s", response);
+  const handleApiCall = async () => {
+    try {
+      const response = (await pageEditorService.fetchJson()).data;
+      setData(response.result);
+      setReRender((prev) => !prev);
     } catch (error) {
       console.error(error);
     }
   };
 
-  useEffect(() => {
-    handelApiCall();
-  }, [data]);
+  // 🔥 Proper re-render trigger
+  const handleReRender = () => {
+    setReRender((prev) => !prev);
+  };
 
-  ////can e ysed the case of adding new json form backend
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    handleApiCall();
+  }, [reRender]);
 
   return (
     <EditorContext.Provider
       value={{
         data,
         setData,
-        selectedElemet,
+        selectedElement,
         setSelectedElement,
+        handleReRender,
       }}
     >
       {children}
@@ -57,6 +61,7 @@ export const EditorProvider = ({
   );
 };
 
+// Hook
 // eslint-disable-next-line react-refresh/only-export-components
 export const useEditor = () => {
   const ctx = useContext(EditorContext);
