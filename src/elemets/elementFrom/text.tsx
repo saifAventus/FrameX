@@ -16,12 +16,14 @@ import type {
 import { AlignCenter, AlignLeft, AlignRight, ChevronDown } from "lucide-react";
 import MultiChoiceChip from "../elementComponents/muiltiChoiceChip";
 import Dropdown from "../elementComponents/dropdown";
+import { Input } from "@/components/ui/input";
 
 function TextForm({ data, onChange, name }: IGlobalElementProps) {
-  const { reset, handleSubmit, control, watch } = useForm<TGlobalElementProps>({
-    resolver: zodResolver(GlobalStyleScheme),
-    defaultValues: {},
-  });
+  const { reset, handleSubmit, control, watch, register } =
+    useForm<TGlobalElementProps>({
+      resolver: zodResolver(GlobalStyleScheme),
+      defaultValues: {},
+    });
 
   useEffect(() => {
     reset(parseTailwindToForm(data!));
@@ -73,7 +75,13 @@ function TextForm({ data, onChange, name }: IGlobalElementProps) {
                         <Dropdown
                           data={textSize}
                           value={field.value! as string}
-                          onChange={(value) => field.onChange(value)}
+                          onChange={(value) => {
+                            field.onChange(value);
+                            handleUpdate({
+                              ...watch(),
+                              fontWeight: value as string,
+                            });
+                          }}
                           Icon={ChevronDown}
                           type="text"
                         />
@@ -81,6 +89,16 @@ function TextForm({ data, onChange, name }: IGlobalElementProps) {
                     );
                   }}
                 />
+
+                <div className="flex flex-row items-center">
+                  <label htmlFor="color">text color</label>
+                  <Input
+                    type="color"
+                    id="color"
+                    {...register("color")}
+                    defaultValue={"#ffffff"}
+                  />
+                </div>
               </div>
             </AccordionContent>
           </AccordionItem>

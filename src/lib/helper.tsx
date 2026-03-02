@@ -25,6 +25,7 @@ export interface LayoutForm {
     | "4xl"
     | "5xl"
     | "6xl";
+  color?: string;
   // backgroundColor?: string;
 }
 
@@ -46,9 +47,12 @@ export const handleStringConversion = (
 
     if (
       typeof value === "string" &&
-      (value.includes("[") || value.includes("#"))
+      (value.includes("[") || value.includes("#")) &&
+      key !== "color"
     ) {
       utilities.push(`${key}-[${value}]`);
+    } else if (key === "color") {
+      utilities.push(`text-[${value}]`);
     } else if (key === "flexDirection") {
       utilities.push(`flex ${value}`);
     } else if (key === "justify") {
@@ -114,6 +118,13 @@ export const parseTailwindToForm = (className: string) => {
         | "4xl"
         | "5xl"
         | "6xl";
+    }
+    if (t.startsWith("text-") && t.includes("[")) {
+      form.color = t
+        .slice(t.indexOf("-") + 1)
+        .replace("[", "")
+        .replace("]", "")
+        .replace(/^-/, "");
     }
   }
 

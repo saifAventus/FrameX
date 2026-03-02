@@ -73,7 +73,7 @@ const Dropdown = React.memo(function Dropdown<T>({
       )}
 
       {open && (
-        <div className="absolute flex flex-col gap-2 z-50 bg-white shadow rounded p-3">
+        <div className="absolute flex flex-col gap-2 z-50 bg-white shadow rounded p-3  w-30 ">
           {data.map((item) => (
             <button
               key={item.value as string}
@@ -83,7 +83,7 @@ const Dropdown = React.memo(function Dropdown<T>({
                 setOpen(false);
                 setText(item.value as string);
               }}
-              className="hover:underline cursor-pointer"
+              className="hover:underline cursor-pointer text-left"
             >
               {item.label}
             </button>

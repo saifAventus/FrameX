@@ -16,6 +16,7 @@ const GlobalStyleScheme = z.object({
   flexDirection: z.union([z.number(), z.string()]).optional(),
   textAlign: z.union([z.number(), z.string()]).optional(),
   fontWeight: z.string().optional(),
+  color: z.string().optional(),
 });
 export default GlobalStyleScheme;
 
