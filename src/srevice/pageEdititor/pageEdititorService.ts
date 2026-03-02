@@ -25,7 +25,7 @@ const pageEditorService = {
     return api.post(`${URL_PATH}/add`, payload);
   },
   deleteJson(id: string) {
-    return api.delete(`delete?id=${id}`);
+    return api.delete(`${URL_PATH}/delete?id=${id}`);
   },
 };
 

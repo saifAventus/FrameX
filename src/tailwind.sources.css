@@ -32,7 +32,8 @@
   the class string appears in a scanned source file (TSX/TS).
   
   Make sure your vite.config.ts is scanning src/ (it does by default).
-  Dynamic classes stored in state/constants will be detected fine.
+  Dynamic classes stored in state/constants will be detected fine.text-left
+
 */
 
-@source inline("{underline,p-{1,2,3,4,5,6},m-{1,2,3,4,5,6},bg-{red,blue,green}-500,bg-{black,white},text-{white,black,sm,base,lg,xl},flex,grid,block,hidden,items-{center,start,end},justify-{center,between,start,end},w-full,h-full,w-50,h-50}");
+@source inline("{underline,p-{1,2,3,4,5,6},m-{1,2,3,4,5,6},bg-{red,blue,green}-500,bg-{black,white},text-{white,black,sm,base,lg,xl,2xl,3xl,4xl,5xl,6xl,center,left,right,justify,start,end},flex,grid,block,hidden,items-{center,start,end},justify-{center,between,start,end},w-full,h-full,w-50,h-50}");

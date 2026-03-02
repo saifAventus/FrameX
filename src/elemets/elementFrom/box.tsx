@@ -16,11 +16,17 @@ import type {
   IGlobalElementProps,
   TGlobalElementProps,
 } from "@/shared/types/elementNode";
-import { handleStringConversion, parseTailwindToForm } from "@/lib/helper";
+import {
+  breakValue,
+  handleStringConversion,
+  parseTailwindToForm,
+} from "@/lib/helper";
 import MultiChoiceChip from "../elementComponents/muiltiChoiceChip";
+import Dropdown from "../elementComponents/dropdown";
+import { ChevronDown } from "lucide-react";
 
 function Box({ data, onChange, name }: IGlobalElementProps) {
-  const { register, reset, handleSubmit, control, watch, setValue } =
+  const { register, reset, handleSubmit, control, watch } =
     useForm<TGlobalElementProps>({
       resolver: zodResolver(BoxSchema),
       defaultValues: {},
@@ -32,6 +38,11 @@ function Box({ data, onChange, name }: IGlobalElementProps) {
 
   const handleUpdate = (formData: TGlobalElementProps) => {
     onChange(handleStringConversion(formData, data));
+  };
+
+  const handleValueChange = (v: string, unit: string) => {
+    const cleaned = v.replace(/[^\d.]/g, "");
+    return `${cleaned}${unit}`;
   };
   return (
     <div className="p-2 border border-gray-200 rounded-md">
@@ -51,22 +62,154 @@ function Box({ data, onChange, name }: IGlobalElementProps) {
                   <div className="flex gap-2">
                     <div>
                       <label htmlFor="p">Padding</label>
-                      <Input type="number" id="p" {...register("p")} />
+                      <div className="flex flex-row items-center gap-1">
+                        <Controller
+                          name="p"
+                          control={control}
+                          render={({ field }) => {
+                            const { value, unit } = breakValue(
+                              field.value || "0px",
+                            );
+                            return (
+                              <div className="flex gap-2 items-center">
+                                <Input
+                                  type="text"
+                                  value={value}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      handleValueChange(e.target.value, unit),
+                                    )
+                                  }
+                                />
+
+                                <Dropdown
+                                  data={sizeType}
+                                  value={unit}
+                                  onChange={(e) =>
+                                    field.onChange(`${value || 0}${e}`)
+                                  }
+                                  Icon={ChevronDown}
+                                  type="text"
+                                />
+                              </div>
+                            );
+                          }}
+                        />
+                      </div>
                     </div>
                     <div>
                       <label htmlFor="m">Margin</label>
-                      <Input type="number" id="m" {...register("m")} />
+                      <div className="flex flex-row items-center gap-1">
+                        <Controller
+                          name="m"
+                          control={control}
+                          render={({ field }) => {
+                            const { value, unit } = breakValue(
+                              field.value || "0px",
+                            );
+
+                            return (
+                              <div className="flex gap-2 items-center">
+                                <Input
+                                  type="text"
+                                  value={value}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      handleValueChange(e.target.value, unit),
+                                    )
+                                  }
+                                />
+
+                                <Dropdown
+                                  data={sizeType}
+                                  value={unit}
+                                  onChange={(e) =>
+                                    field.onChange(`${value || 0}${e}`)
+                                  }
+                                  Icon={ChevronDown}
+                                  type="text"
+                                />
+                              </div>
+                            );
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <div>
+                  <div className="flex flex-col">
                     <label htmlFor="w">Width</label>
-                    <Input type="text" id="w" {...register("w")} />
+                    <div className="flex flex-row items-center gap-1">
+                      <Controller
+                        name="w"
+                        control={control}
+                        render={({ field }) => {
+                          const { value, unit } = breakValue(
+                            field.value || "0px",
+                          );
+                          return (
+                            <div className="flex gap-2 items-center">
+                              <Input
+                                type="text"
+                                value={value}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    handleValueChange(e.target.value, unit),
+                                  )
+                                }
+                              />
+
+                              <Dropdown
+                                data={sizeType}
+                                value={unit}
+                                onChange={(e) =>
+                                  field.onChange(`${value || 0}${e}`)
+                                }
+                                Icon={ChevronDown}
+                                type="text"
+                              />
+                            </div>
+                          );
+                        }}
+                      />
+                    </div>
                   </div>
                   <div>
                     <label htmlFor="h">Height</label>
-                    <Input type="text" id="h" {...register("h")} />
+                    <div className="flex flex-row items-center gap-1">
+                      <Controller
+                        name="h"
+                        control={control}
+                        render={({ field }) => {
+                          const { value, unit } = breakValue(
+                            field.value || "0px",
+                          );
+                          return (
+                            <div className="flex gap-2 items-center">
+                              <Input
+                                type="text"
+                                value={value}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    handleValueChange(e.target.value, unit),
+                                  )
+                                }
+                              />
+                              <Dropdown
+                                data={sizeType}
+                                value={unit}
+                                onChange={(e) =>
+                                  field.onChange(`${value || 0}${e}`)
+                                }
+                                Icon={ChevronDown}
+                                type="text"
+                              />
+                            </div>
+                          );
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -128,17 +271,39 @@ function Box({ data, onChange, name }: IGlobalElementProps) {
                 <label htmlFor="flexDirection">Flex Direction</label>
                 <Controller
                   control={control}
-                  {...register("flexDirection")}
-                  render={({ field }) => (
-                    <MultiChoiceChip
-                      data={flexRow}
-                      value={field.value!}
-                      onSelect={(value) => {
-                        field.onChange(value); // <-- updates the form state properly
-                        handleUpdate({ ...watch(), align: value }); // <-- call your custom update
-                      }}
-                    />
-                  )}
+                  name="flexDirection"
+                  render={({ field }) => {
+                    return (
+                      <MultiChoiceChip
+                        data={flexRow}
+                        value={field.value!}
+                        onSelect={(value) => {
+                          field.onChange(value);
+                          handleUpdate({ ...watch(), align: value });
+                        }}
+                      />
+                    );
+                  }}
+                />
+              </div>
+              <div>
+                <label htmlFor="justify">justify Content</label>
+                <Controller
+                  control={control}
+                  name="justify"
+                  render={({ field }) => {
+                    return (
+                      <MultiChoiceChip
+                        className="grid grid-cols-2 grid-rows-2"
+                        data={justifyItem}
+                        value={field.value!}
+                        onSelect={(value) => {
+                          field.onChange(value);
+                          handleUpdate({ ...watch(), justify: value });
+                        }}
+                      />
+                    );
+                  }}
                 />
               </div>
             </AccordionContent>
@@ -162,32 +327,47 @@ const flexRow = [
   },
 ];
 
-// const justifyItem = [
-//   {
-//     label: "justify-start",
-//     value: "justify-start",
-//   },
-//   {
-//     label: "justify-end",
-//     value: "justify-end",
-//   },
-//   {
-//     label: "justify-center",
-//     value: "justify-center",
-//   },
-//   {
-//     label: "justify-between",
-//     value: "justify-between",
-//   },
-//   {
-//     label: "justify-around",
-//     value: "justify-around",
-//   },
-//   {
-//     label: "justify-evenly",
-//     value: "justify-evenly",
-//   },
-// ];
+const sizeType = [
+  {
+    label: "px",
+    value: "px",
+  },
+  {
+    label: "rem",
+    value: "rem",
+  },
+  {
+    label: "%",
+    value: "%",
+  },
+];
+
+const justifyItem = [
+  {
+    label: "start",
+    value: "start",
+  },
+  {
+    label: "end",
+    value: "end",
+  },
+  {
+    label: "center",
+    value: "center",
+  },
+  {
+    label: "between",
+    value: "between",
+  },
+  {
+    label: "around",
+    value: "around",
+  },
+  {
+    label: "evenly",
+    value: "evenly",
+  },
+];
 
 // const alignItems = [
 //   {

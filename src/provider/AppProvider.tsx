@@ -15,7 +15,7 @@ function AppProvider({ routes }: TAppProvider) {
       <div className="flex-1 flex flex-col min-w-0">
         <Header />
 
-        <main className="flex-1 overflow-auto p-8">
+        <main className="flex-1 overflow-hidden h-full">
           <Routes>
             {routes.map((route: NavItem) => (
               <Route

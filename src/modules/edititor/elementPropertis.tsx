@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import BoxForm from "../../elemets/elementFrom/box";
 import TextForm from "@/elemets/elementFrom/text";
 import { useEditor } from "@/shared/hooks/editorProvider";
 import pageEditorService from "@/srevice/pageEdititor/pageEdititorService";
+import EmptyState from "@/shared/ui/fallbackNoData";
 type ElementFormProps<T> = {
   data: T;
   onChange: (data: T) => void;
@@ -11,7 +10,9 @@ type ElementFormProps<T> = {
 };
 
 type ComponentFactory = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Box: React.FC<ElementFormProps<any>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Text: React.FC<ElementFormProps<any>>;
 };
 
@@ -23,26 +24,16 @@ const componentFactory: ComponentFactory = {
 function ElementPropertis() {
   const { selectedElement, handleReRender } = useEditor();
 
-  if (!selectedElement) return <div>No selection</div>;
+  if (!selectedElement) return <EmptyState />;
 
   const Component =
     componentFactory[
       (selectedElement?.element as keyof ComponentFactory) ?? ""
     ];
 
-  if (!Component) {
-    return (
-      <div className="justify-center items-center align-middle">
-        No editor available
-      </div>
-    );
+  if (!Component || !selectedElement.props?.className) {
+    return <EmptyState />;
   }
-  if (!selectedElement.props?.className)
-    return (
-      <div className="justify-center items-center align-middle">
-        No editor available
-      </div>
-    );
 
   const handleUpdate = async (className: string) => {
     try {
@@ -51,7 +42,6 @@ function ElementPropertis() {
         updated: className,
         elementType: "className",
       });
-
       console.log(response);
       handleReRender();
     } catch (error) {

@@ -34,7 +34,9 @@ const TreeNode = memo(
           parentId: selectedElement.id!,
           newNode,
         });
-        console.log(response);
+        if (!response.data.isSuccess) {
+          console.log("failed");
+        }
         handleReRender();
       } catch (error) {
         console.error(error);
@@ -55,7 +57,7 @@ const TreeNode = memo(
           <Dropdown
             data={elementLibrary}
             Icon={Plus}
-            onSelect={(value) => handleAddInside(value)}
+            onChange={(value) => handleAddInside(value as string)}
           />
         </div>
       );
@@ -68,8 +70,10 @@ const TreeNode = memo(
     const handleDelete = async () => {
       try {
         const response = await pageEditorService.deleteJson(effectiveNode.id!);
-        console.log(response);
-        handleReRender();
+        if (response.status === 200) {
+          handleReRender();
+          setSelectedElement(null);
+        }
       } catch (error) {
         console.error(error);
       }
@@ -90,20 +94,25 @@ const TreeNode = memo(
           <span className="text-sm font-medium">
             {getDisplayName(effectiveNode)}
           </span>
-          <button onClick={handleDelete}>
-            <Trash />
-          </button>
-          {elementLibrary.find((item) => item.value === effectiveNode.element)
-            ?.excludeDropDown ? (
-            ""
-          ) : (
-            <Dropdown
-              data={elementLibrary}
-              classname=""
-              Icon={Plus}
-              onSelect={(value) => handleAddInside(value)}
-            />
-          )}
+          <div className="flex flex-row gap-2 items-center">
+            {elementLibrary.find((item) => item.value === effectiveNode.element)
+              ?.excludeDropDown ? (
+              ""
+            ) : (
+              <Dropdown
+                data={elementLibrary}
+                Icon={Plus}
+                onChange={(value) => handleAddInside(value as string)}
+              />
+            )}
+
+            <button
+              onClick={handleDelete}
+              className="hover:text-red-500 text-gray-500"
+            >
+              <Trash size={20} />
+            </button>
+          </div>
         </div>
 
         {children.map((child, i) => (

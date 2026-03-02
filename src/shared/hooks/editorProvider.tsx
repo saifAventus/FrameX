@@ -24,13 +24,10 @@ export const EditorProvider = ({ children }: { children: React.ReactNode }) => {
     null,
   );
 
-  const [reRender, setReRender] = useState(false);
-
   const handleApiCall = async () => {
     try {
       const response = (await pageEditorService.fetchJson()).data;
       setData(response.result);
-      setReRender((prev) => !prev);
     } catch (error) {
       console.error(error);
     }
@@ -38,13 +35,13 @@ export const EditorProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 🔥 Proper re-render trigger
   const handleReRender = () => {
-    setReRender((prev) => !prev);
+    handleApiCall();
+    return;
   };
-
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     handleApiCall();
-  }, [reRender]);
+  }, []);
 
   return (
     <EditorContext.Provider

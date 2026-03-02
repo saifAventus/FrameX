@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
+import React from "react";
 export type Tdata = {
   value: string;
   label: string;
@@ -13,52 +14,84 @@ export interface ISelectData<T> {
   onSelect: (value: T) => void;
   value?: T;
   title?: string;
+  className?: string;
+}
+interface DropdownProps<T> {
+  data: Array<{
+    label: string;
+    value: T;
+    icon?: React.ComponentType;
+  }>;
+  value?: string;
+  onChange: (value: T) => void;
+  Icon?: React.ComponentType;
+  type?: "text" | "select";
 }
 
-function Dropdown({ data, Icon, onSelect }: ISelectData<string>) {
+const Dropdown = React.memo(function Dropdown<T>({
+  data,
+  Icon,
+  value,
+  onChange,
+  type,
+}: DropdownProps<T>) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const [text, setText] = useState(value);
+
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+    if (!open) return;
+
+    const handler = (e: PointerEvent) => {
+      if (!ref.current?.contains(e.target as Node)) {
         setOpen(false);
       }
-    }
+    };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    window.addEventListener("pointerdown", handler);
+    return () => window.removeEventListener("pointerdown", handler);
+  }, [open]);
+
+  useEffect(() => {
+    setText(value);
+  }, [value]);
+
   return (
-    <>
-      <div ref={ref} className="inline-block flex-row ">
+    <div ref={ref} className="relative inline-block">
+      {type === "text" && text?.length ? (
+        <div onClick={() => setOpen((v) => !v)} className="text-black">
+          {text || value}
+        </div>
+      ) : (
         <button
+          type="button"
           onClick={() => setOpen((v) => !v)}
-          className="bg-transparent text-black text-wrap"
+          className="bg-transparent"
         >
           {Icon ? <Icon /> : "Select"}
         </button>
+      )}
 
-        {open && (
-          <div className="w-fit  scrollbar-xs rounded shadow-sm flex flex-col space-y-2 max-h-48 overflow-y-scroll scrollbar-thin absolute z-100  bg-white ">
-            {data?.map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                onClick={() => {
-                  onSelect(item.value);
-                  setOpen(false);
-                }}
-                className="flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-100"
-              >
-                {item.icon && <item.icon />}
-                {item.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </>
+      {open && (
+        <div className="absolute flex flex-col gap-2 z-50 bg-white shadow rounded p-3">
+          {data.map((item) => (
+            <button
+              key={item.value as string}
+              type="button"
+              onClick={() => {
+                onChange(item.value);
+                setOpen(false);
+                setText(item.value as string);
+              }}
+              className="hover:underline cursor-pointer"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
-}
+});
 
 export default Dropdown;

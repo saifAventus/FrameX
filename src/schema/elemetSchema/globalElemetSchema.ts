@@ -14,6 +14,8 @@ const GlobalStyleScheme = z.object({
   text: z.union([z.number(), z.string()]).optional(),
   border: z.union([z.number(), z.string()]).optional(),
   flexDirection: z.union([z.number(), z.string()]).optional(),
+  textAlign: z.union([z.number(), z.string()]).optional(),
+  fontWeight: z.string().optional(),
 });
 export default GlobalStyleScheme;
 

@@ -50,7 +50,11 @@ function PreviewEditor() {
   //   // eslint-disable-next-line react-hooks/set-state-in-effect
   //   fetchJson();
   // }, [data]);
-  return <div className="h-screen">{jsconfig?.layout?.map(renderNode)}</div>;
+  return (
+    <div className="h-full w-full overflow-auto relative scrollbar-xs">
+      <div className="w-full">{jsconfig?.layout?.map(renderNode)}</div>
+    </div>
+  );
 }
 
 export default PreviewEditor;

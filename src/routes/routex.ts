@@ -13,12 +13,12 @@ export interface NavItem {
   component?: ComponentType | LazyExoticComponent<ComponentType>;
 }
 
-const PageEdititor = lazy(() => import("../modules/edititor/pagesEdititor"));
+const PageEditor = lazy(() => import("../modules/edititor/pagesEdititor"));
 const Dashboard = lazy(() => import("../modules/dashboard/dashboard"));
 
 const NAV_ITEMS: NavItem[] = [
   { id: "1", label: "Dashboard", href: "/dashboard", component: Dashboard },
-  { id: "2", label: "Projects", href: "/projects", component: PageEdititor },
+  { id: "2", label: "Projects", href: "/projects", component: PageEditor },
   { id: "3", label: "Tasks", href: "/tasks" },
   { id: "4", label: "Team", href: "/team" },
   { id: "5", label: "Settings", href: "/settings" },

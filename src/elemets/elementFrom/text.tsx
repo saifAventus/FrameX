@@ -13,11 +13,12 @@ import type {
   IGlobalElementProps,
   TGlobalElementProps,
 } from "@/shared/types/elementNode";
-import { AlignCenter, AlignLeft, AlignRight } from "lucide-react";
+import { AlignCenter, AlignLeft, AlignRight, ChevronDown } from "lucide-react";
 import MultiChoiceChip from "../elementComponents/muiltiChoiceChip";
+import Dropdown from "../elementComponents/dropdown";
 
 function TextForm({ data, onChange, name }: IGlobalElementProps) {
-  const { reset, handleSubmit, control } = useForm<TGlobalElementProps>({
+  const { reset, handleSubmit, control, watch } = useForm<TGlobalElementProps>({
     resolver: zodResolver(GlobalStyleScheme),
     defaultValues: {},
   });
@@ -44,16 +45,41 @@ function TextForm({ data, onChange, name }: IGlobalElementProps) {
             <AccordionTrigger className="text-white">Layout</AccordionTrigger>
             <AccordionContent>
               <div>
-                <label htmlFor="textAlign">data</label>
+                <label htmlFor="textAlign">TEXT ALIGN</label>
                 <Controller
-                  name="align"
+                  name="textAlign"
                   control={control}
                   render={({ field }) => (
                     <MultiChoiceChip
                       data={textAlignData}
-                      onSelect={field.onChange}
+                      value={field.value!}
+                      onSelect={(value) => {
+                        field.onChange(value);
+                        handleUpdate({ ...watch(), textAlign: value });
+                      }}
                     />
                   )}
+                />
+              </div>
+
+              <div className="flex flex-row items-center gap-1">
+                <Controller
+                  name="fontWeight"
+                  control={control}
+                  render={({ field }) => {
+                    return (
+                      <div className="flex gap-2 items-center ">
+                        <h4>Font Size</h4>
+                        <Dropdown
+                          data={textSize}
+                          value={field.value! as string}
+                          onChange={(value) => field.onChange(value)}
+                          Icon={ChevronDown}
+                          type="text"
+                        />
+                      </div>
+                    );
+                  }}
                 />
               </div>
             </AccordionContent>
@@ -81,5 +107,44 @@ const textAlignData = [
     value: "right",
     label: "Right",
     icon: AlignRight,
+  },
+];
+
+const textSize = [
+  {
+    value: "sm",
+    label: "Small",
+  },
+  {
+    value: "base",
+    label: "Base",
+  },
+  {
+    value: "lg",
+    label: "Large",
+  },
+  {
+    value: "xl",
+    label: "Extra Large",
+  },
+  {
+    value: "2xl",
+    label: "Extra Large",
+  },
+  {
+    value: "3xl",
+    label: "Extra Large",
+  },
+  {
+    value: "4xl",
+    label: "Extra Large",
+  },
+  {
+    value: "5xl",
+    label: "Extra Large",
+  },
+  {
+    value: "6xl",
+    label: "Extra Large",
   },
 ];
