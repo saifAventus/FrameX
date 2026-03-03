@@ -9,7 +9,7 @@ import { elementLibrary } from "@/lib/utils";
 import { useEditor } from "@/shared/hooks/editorProvider";
 import type { ElementNode } from "@/shared/types/elementNode";
 import pageEditorService from "@/srevice/pageEdititor/pageEdititorService";
-import { Plus, Trash } from "lucide-react";
+import { Plus, Trash, Layers } from "lucide-react";
 
 import { memo } from "react";
 
@@ -25,6 +25,13 @@ const TreeNode = memo(
     depth: number;
   }) => {
     const { selectedElement, setSelectedElement, handleReRender } = useEditor();
+
+    // Move variable declaration to top to prevent ReferenceError in empty object check
+    const resolved = resolveRef(node.$ref, definitions);
+    const effectiveNode = resolved ?? node;
+    const children = getChildren(effectiveNode);
+
+    const isSelected = effectiveNode.id === selectedElement?.id;
 
     const handleAddInside = async (type: string) => {
       if (!selectedElement) return;
@@ -43,31 +50,8 @@ const TreeNode = memo(
       }
     };
 
-    if (!Object.keys(node).length) {
-      return (
-        <div
-          onClick={() => {
-            setSelectedElement(effectiveNode);
-          }}
-          style={{ paddingLeft: depth * 14 }}
-          className="flex items-center justify-between gap-2 py-1 cursor-pointer hover:bg-blue-50 rounded-md"
-        >
-          <span className="text-sm font-medium">Layer</span>
-
-          <Dropdown
-            data={elementLibrary}
-            Icon={Plus}
-            onChange={(value) => handleAddInside(value as string)}
-          />
-        </div>
-      );
-    }
-
-    const resolved = resolveRef(node.$ref, definitions);
-    const effectiveNode = resolved ?? node;
-    const children = getChildren(effectiveNode);
-
-    const handleDelete = async () => {
+    const handleDelete = async (e: React.MouseEvent) => {
+      e.stopPropagation();
       try {
         const response = await pageEditorService.deleteJson(effectiveNode.id!);
         if (response.status === 200) {
@@ -78,51 +62,98 @@ const TreeNode = memo(
         console.error(error);
       }
     };
-    return (
-      <div>
-        <div
-          onClick={() => {
-            setSelectedElement(effectiveNode);
-          }}
-          style={{ paddingLeft: depth * 14 }}
-          className={
-            effectiveNode.id === selectedElement?.id
-              ? "flex items-center justify-between gap-2  cursor-pointer  rounded-md bg-blue-50 px-2"
-              : "flex items-center justify-between gap-2 py-1 cursor-pointer rounded-md  hover:border hover:border-blue-50 px-2"
-          }
-        >
-          <span className="text-sm font-medium">
-            {getDisplayName(effectiveNode)}
-          </span>
-          <div className="flex flex-row gap-2 items-center">
-            {elementLibrary.find((item) => item.value === effectiveNode.element)
-              ?.excludeDropDown ? (
-              ""
-            ) : (
-              <Dropdown
-                data={elementLibrary}
-                Icon={Plus}
-                onChange={(value) => handleAddInside(value as string)}
-              />
-            )}
 
+    if (!Object.keys(node).length) {
+      return (
+        <div
+          onClick={() => setSelectedElement(effectiveNode)}
+          style={{ paddingLeft: `${depth * 16 + 12}px` }}
+          className={`group flex items-center justify-between gap-2 py-1.5 pr-2 my-0.5 cursor-pointer rounded-md transition-colors ${
+            isSelected
+              ? "bg-blue-50 text-blue-700"
+              : "hover:bg-gray-100 text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          <div className="flex items-center gap-2 overflow-hidden">
+            <Layers
+              size={14}
+              className={isSelected ? "text-blue-500" : "text-gray-400"}
+            />
+            <span className="text-xs font-medium truncate">Empty Layer</span>
+          </div>
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <Dropdown
+              data={elementLibrary}
+              Icon={Plus}
+              onChange={(value) => handleAddInside(value as string)}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    const excludeDropDown = elementLibrary.find(
+      (item) => item.value === effectiveNode.element,
+    )?.excludeDropDown;
+
+    return (
+      <div className="flex flex-col w-full">
+        <div
+          onClick={() => setSelectedElement(effectiveNode)}
+          style={{ paddingLeft: `${depth * 16 + 12}px` }}
+          className={`group flex items-center justify-between gap-2 py-1.5 pr-2 my-0.5 cursor-pointer rounded-md transition-colors border border-transparent ${
+            isSelected
+              ? "bg-blue-50 border-blue-100 text-blue-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+              : "hover:bg-gray-100 hover:border-gray-200/50 text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          <div className="flex items-center gap-2 overflow-hidden">
+            <Layers
+              size={14}
+              className={`shrink-0 ${isSelected ? "text-blue-500" : "text-gray-400 group-hover:text-gray-500"}`}
+            />
+            <span
+              className={`text-xs truncate ${isSelected ? "font-semibold" : "font-medium"}`}
+            >
+              {getDisplayName(effectiveNode)}
+            </span>
+          </div>
+
+          <div
+            className={`flex flex-row gap-1 items-center transition-opacity ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+          >
+            {!excludeDropDown && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="flex text-gray-400 hover:text-blue-600"
+              >
+                <Dropdown
+                  data={elementLibrary}
+                  Icon={Plus}
+                  onChange={(value) => handleAddInside(value as string)}
+                />
+              </div>
+            )}
             <button
               onClick={handleDelete}
-              className="hover:text-red-500 text-gray-500"
+              className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+              title="Delete layer"
             >
-              <Trash size={20} />
+              <Trash size={14} />
             </button>
           </div>
         </div>
 
-        {children.map((child, i) => (
-          <TreeNode
-            key={i}
-            node={child}
-            definitions={definitions}
-            depth={depth + 1}
-          />
-        ))}
+        <div className="w-full">
+          {children.map((child, i) => (
+            <TreeNode
+              key={i}
+              node={child}
+              definitions={definitions}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
       </div>
     );
   },

@@ -3,6 +3,7 @@ import TextForm from "@/elemets/elementFrom/text";
 import { useEditor } from "@/shared/hooks/editorProvider";
 import pageEditorService from "@/srevice/pageEdititor/pageEdititorService";
 import EmptyState from "@/shared/ui/fallbackNoData";
+import ImgForm from "@/elemets/elementFrom/image";
 type ElementFormProps<T> = {
   data: T;
   onChange: (data: T) => void;
@@ -14,11 +15,15 @@ type ComponentFactory = {
   Box: React.FC<ElementFormProps<any>>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Text: React.FC<ElementFormProps<any>>;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Image: React.FC<ElementFormProps<any>>;
 };
 
 const componentFactory: ComponentFactory = {
   Box: BoxForm,
   Text: TextForm,
+  Image: ImgForm,
 };
 
 function ElementPropertis() {

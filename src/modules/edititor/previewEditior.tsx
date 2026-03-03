@@ -1,8 +1,9 @@
 import Box from "@/elemets/elementComponents/box";
 import Text from "@/elemets/elementComponents/text";
+import Image from "@/elemets/elementComponents/img";
 import React from "react";
 import type { ElementNode } from "@/shared/types/elementNode";
-type ElementType = "Box" | "Text";
+type ElementType = "Box" | "Text" | "Image";
 
 import jsconfig from "../../../../FarmeXBackend/src/assets/dummy.json";
 
@@ -12,12 +13,14 @@ export interface ElementComponentProps {
   children?: React.ReactNode;
   // as?: keyof JSX.IntrinsicElements;
   text?: string;
+  src?: string;
 }
 
 type ComponentRegistry = Record<ElementType, React.FC<ElementComponentProps>>;
 const componentRegistry: ComponentRegistry = {
   Box,
   Text,
+  Image,
 };
 
 function renderNode(node: ElementNode): React.ReactNode {
